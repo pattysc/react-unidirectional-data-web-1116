@@ -84,6 +84,11 @@ module.exports = class Toggler extends React.Component {
   render() {
     return <a onClick={this.handleClick}>{this.state.on}</a>
   }
+
+  updateState(state) {
+    // we can also perform other transformations here
+    this.setState(state)
+  }
 }
 ```
 
