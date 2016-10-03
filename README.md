@@ -21,10 +21,8 @@ in order to organize everything beyond trivial demos.
 ### Using Change Listeners
 
 To understand what "unidirectional data flow" actually means, let's first
-consider a real-world example:
-
-We want to implement a simple application that allows us to organize tasks in
-some form of project board, similar to Trello:
+consider a real-world example: We want to implement a simple application that
+allows us to organize tasks in some form of project board, similar to Trello:
 
 ![Trello Screenshot](./assets/Trello.png)
 
@@ -37,7 +35,7 @@ how one would go about organizing the underlying data:
 
 Each card can be represented by a JSON object:
 
-```json
+```js
 {
   "title": "Create Mockups",
   "id": 123
@@ -62,15 +60,15 @@ distinct set of cards associated with it:
 
 Now that we have a set of well-defined models and a beautifully designed UI, we
 can go about structuring our component hierarchy. In this case, the most basic
-screen is fairly simple: We have a project, which can be represented by a
-single, stateful component, multiple column and a variety of card components.
+screen is fairly simple. We have a project, which can be represented by a
+single, stateful component, multiple columns and a variety of card components.
 
-In other words, this is how our project's render function could look like:
+In other words, this is what our project's render function could look like:
 
 ```js
 class Board extends React.Component {
   render () {
-    const {columns} = this.props;
+    const { columns } = this.props;
     return (
       <div>
         {columns.map(({cards, id}) => <Column key={id} id={id} cards={cards} />)}
@@ -213,6 +211,9 @@ class App extends React.Component {
 Now this _would_ work, but it's complicated beyond measures. It's much easier
 and less error-prone to move our state out into a separate store.
 
+Let's take a step back and have a look at what our current architecture looks
+like.
+
 ```
 <App /> (can update this.state.board)
   <Board /> (has to delegate to parent component)
@@ -241,7 +242,6 @@ Clearly moving the state out into a separate, completely isolated store is the
 desired solution here. Instead of communicating via components that "pass
 through" events, we directly update the store (at least for now) and render
 subsequent changes by passing down updated `props`.
-```
 
 ### Towards a Centralized Store
 
@@ -343,15 +343,13 @@ class BoardStore extends EventEmitter {
   // ...
   updateCardTitle (cardId, updatedTitle) {
     for (const column of this.state.columns) {
-      for (const card of column.cards) {
-        if (card.id === cardId) {
-          // Ideally we should treat our store as an immutable data structure,
-          // meaning instead of updated properties on cards directly, we should
-          // create new cards to replace the one that should be updated. For now,
-          // let's just set the title property and worry about the rest later.
-          card.title = updatedTitle;
-        }
-      }
+      const card = column.cards.find(card => card.id === cardId);
+
+      // Ideally we should treat our store as an immutable data structure,
+      // meaning instead of updated properties on cards directly, we should
+      // create new cards to replace the one that should be updated. For now,
+      // let's just set the title property and worry about the rest later.
+      card.title = updatedTitle;
     }
     this.setState(this.state);
   }
