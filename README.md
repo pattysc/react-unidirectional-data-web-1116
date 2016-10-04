@@ -3,35 +3,20 @@
 ## Objectives
 
 1. Explain what we mean by "unidirectional data"
-2. Explain how React makes use of unidirectional data in components (think
-   `setState()`)
+2. Explain how React makes use of unidirectional data in components (think `setState()`)
 3. Describe how to take advantage of unidirectional data flow in an application
-
-## Overview
-
-In this lesson we're going to learn about a concept called "unidirectional"
-data-flow. Web Applications are primarily centered around rendering application
-state and data. It's extremely important to choose an architecture that allows
-us to scale our application as we add new components and functionality. Thinking
-about how our components, actions and state containers communicate is crucial
-in order to organize everything beyond trivial demos.
 
 ## Towards Unidirectional Data Flow
 
 ### Using Change Listeners
 
-To understand what "unidirectional data flow" actually means, let's first
-consider a real-world example: We want to implement a simple application that
-allows us to organize tasks in some form of project board, similar to Trello:
+To understand what "unidirectional data flow" actually means, let's first consider a real-world example: We want to implement a simple application that allows us to organize tasks in some form of project board, similar to Trello:
 
 ![Trello Screenshot](./assets/Trello.png)
 
-Trello allows you to raise issues, represented by "cards", assign them and move
-them into different columns, whereas each column represents a distinct step of
-your workflow.
+Trello allows you to raise issues, represented by "cards", assign them and move them into different columns, whereas each column represents a distinct step of your workflow.
 
-When create an application like that, it's always helpful to first think about
-how one would go about organizing the underlying data:
+When create an application like that, it's always helpful to first think about how one would go about organizing the underlying data:
 
 Each card can be represented by a JSON object:
 
@@ -42,8 +27,7 @@ Each card can be represented by a JSON object:
 }
 ```
 
-Each card can only ever be in exactly one column. Each column has a name and a
-distinct set of cards associated with it:
+Each card can only ever be in exactly one column. Each column has a name and a distinct set of cards associated with it:
 
 ```js
 {
@@ -58,10 +42,7 @@ distinct set of cards associated with it:
 }
 ```
 
-Now that we have a set of well-defined models and a beautifully designed UI, we
-can go about structuring our component hierarchy. In this case, the most basic
-screen is fairly simple. We have a project, which can be represented by a
-single, stateful component, multiple columns and a variety of card components.
+Now that we have a set of well-defined models and a beautifully designed UI, we can go about structuring our component hierarchy. In this case, the most basic screen is fairly simple. We have a project, which can be represented by a single, stateful component, multiple columns and a variety of card components.
 
 In other words, this is what our project's render function could look like:
 
@@ -78,8 +59,7 @@ class Board extends React.Component {
 }
 ```
 
-Fairly trivial, right? A board has an arbitrary number of columns and each
-column can have some number of cards "pinned" to it:
+Fairly trivial, right? A board has an arbitrary number of columns and each column can have some number of cards "pinned" to it:
 
 ```js
 class Column extends React.Component {
@@ -94,13 +74,7 @@ class Column extends React.Component {
 }
 ```
 
-The only problem with this approach so far is that it becomes incredibly hard to
-update deeply nested cards. We kind of just "accepted" that fact that the
-`columns` props gets passed down into the `<Board />` component, but where would
-this essential application state be actually located? Most likely we would have
-some form of `<App />` component that has an `this.state.board = {...}`. Upon
-being mounted, it would do some form of HTTP request and fetch the latest board
-state.
+The only problem with this approach so far is that it becomes incredibly hard to update deeply nested cards. We kind of just "accepted" that fact that the `columns` props gets passed down into the `<Board />` component, but where would this essential application state be actually located? Most likely we would have some form of `<App />` component that has an `this.state.board = {...}`. Upon being mounted, it would do some form of HTTP request and fetch the latest board state.
 
 ```js
 class App extends React.Component {
@@ -118,25 +92,15 @@ class App extends React.Component {
 }
 ```
 
-And that's great and works beautifully. Until... it doesn't. So far all our
-board does is it displays cards, we can't edit them. Now who would want a
-read-only collaborative project management tool? — Exactly, nobody! So let's go
-ahead and add some handler functions!
+And that's great and works beautifully. Until... it doesn't. So far all our board does is it displays cards, we can't edit them. Now who would want a read-only collaborative project management tool? — Exactly, nobody! So let's go ahead and add some handler functions!
 
-Let's assume for a moment that we want to be able to edit the `title` of
-individual cards. In the old days, we would simply create a listener function on
-the card and delegate to the parent component (`<Column />`) once we're done
-editing (typically on `blur`). By delegate we mean "notifying the parent" about
-our changed data (in this case the changed title).
+Let's assume for a moment that we want to be able to edit the `title` of individual cards. In the old days, we would simply create a listener function on the card and delegate to the parent component (`<Column />`) once we're done editing (typically on `blur`). By delegate we mean "notifying the parent" about our changed data (in this case the changed title).
 
-Now we all know how to attach change listeners by now, so we're going to skip
-this part. Let's concentrate on the remaining components instead.
+Now we all know how to attach change listeners by now, so we're going to skip this part. Let's concentrate on the remaining components instead.
 
-The only place where we can update the state of our board / application is in
-the the `<App />` component.
+The only place where we can update the state of our board / application is in the the `<App />` component.
 
-**Remember** Components can't ever update their `props`, they can only mutate
-their own state.
+**Remember** Components can't ever update their `props`, they can only mutate their own state.
 
 Our `<Column />` component would attach an `onChangeTitle` listener to the
 `<Card />` component:
@@ -160,8 +124,7 @@ class Card extends React.Component {
 }
 ```
 
-The `handleChangeCardTitle` itself would actually "delegate" itself to its
-parent component, in this case the actual `<Board />` component:
+The `handleChangeCardTitle` itself would actually "delegate" itself to its parent component, in this case the actual `<Board />` component:
 
 ```js
   handleChangeCardTitle (cardIndex, ev) {
@@ -169,8 +132,7 @@ parent component, in this case the actual `<Board />` component:
   }
 ```
 
-The board would delegate to **its** parent, which is the actual `<App />`
-component:
+The board would delegate to **its** parent, which is the actual `<App />` component:
 
 ```js
   handleChangeCardTitle (columnIndex, cardIndex, ev) {
@@ -178,8 +140,7 @@ component:
   }
 ```
 
-The `<App />` component itself would now **actually** update the underlying
-state:
+The `<App />` component itself would now **actually** update the underlying state:
 
 ```js
 class App extends React.Component {
@@ -208,11 +169,9 @@ class App extends React.Component {
 
 ### Change Listeners? — We don't need them!
 
-Now this _would_ work, but it's complicated beyond measures. It's much easier
-and less error-prone to move our state out into a separate store.
+Now this _would_ work, but it's complicated beyond measures. It's much easier and less error-prone to move our state out into a separate store.
 
-Let's take a step back and have a look at what our current architecture looks
-like.
+Let's take a step back and have a look at what our current architecture looks like.
 
 ```
 <App /> (can update this.state.board)
@@ -224,30 +183,19 @@ like.
       <Card /> (has to delegate to parent component)
 ```
 
-The store could then handle the card updates in one form or another. The
-`<App />` component could subscribe to the store and all components would 
-happy! No needless event handlers, just one, flat state tree.
+The store could then handle the card updates in one form or another. The `<App />` component could subscribe to the store and all components would happy! No needless event handlers, just one, flat state tree.
 
-But let's take a step back first and summarize why the above solution is
-problematic:
+But let's take a step back first and summarize why the above solution is problematic:
 
 1. We had to add a separate event handler on each level.
-2. Needless redundancy: `<Column />` and `<Board />` share _almost_ the same
-   handler function — **almost**.
-3. Adding a separate component "in-between" our existing components would 
-   complicated beyond measure — just imagine adding a separate
-  `<BoardVersion />` component as a child of `<Board />`.
+2. Needless redundancy: `<Column />` and `<Board />` share _almost_ the same handler function — **almost**.
+3. Adding a separate component "in-between" our existing components would complicated beyond measure — just imagine adding a separate `<BoardVersion />` component as a child of `<Board />`.
 
-Clearly moving the state out into a separate, completely isolated store is the
-desired solution here. Instead of communicating via components that "pass
-through" events, we directly update the store (at least for now) and render
-subsequent changes by passing down updated `props`.
+Clearly moving the state out into a separate, completely isolated store is the desired solution here. Instead of communicating via components that "pass through" events, we directly update the store (at least for now) and render subsequent changes by passing down updated `props`.
 
 ### Towards a Centralized Store
 
-Having an isolated store is key in this scenario. We start by implementing our
-own little `BoardStore`, which is going to manage our `board`, `column` and
-`card` records.
+Having an isolated store is key in this scenario. We start by implementing our own little `BoardStore`, which is going to manage our `board`, `column` and `card` records.
 
 Our store can be a simple even emitted that also wraps some custom data:
 
@@ -269,9 +217,7 @@ class BoardStore {
 module.exports = new BoardStore();
 ```
 
-Preferably we don't always want to implement our own eventing system every time
-we write a custom store, so in this case, we're simply going to inherit from
-`EventEmitter` (available via `events`) and use a single `change` event:
+Preferably we don't always want to implement our own eventing system every time we write a custom store, so in this case, we're simply going to inherit from `EventEmitter` (available via `events`) and use a single `change` event:
 
 ```js
 const EventEmitter = require('events').EventEmitter;
@@ -301,16 +247,13 @@ class BoardStore extends EventEmitter {
 }
 ```
 
-**Advanced** Having a single store might not always be the most desirable
-solution. "Classical" Flux can be implemented using multiple stores.
+**Advanced** Having a single store might not always be the most desirable solution. "Classical" Flux can be implemented using multiple stores.
 
-And... BOOM! We have our store! Now let's have a look at our `<App />` component
-and wire it up!
+And... BOOM! We have our store! Now let's have a look at our `<App />` component and wire it up!
 
 ### Subscribing to store changes `<App />`
 
-Our `<App />` component is simply going to listen for store changes and
-encapsulate the corresponding application state whenever a store change occurs:
+Our `<App />` component is simply going to listen for store changes and encapsulate the corresponding application state whenever a store change occurs:
 
 ```js
 class App extends React.Component {
@@ -334,9 +277,7 @@ class App extends React.Component {
 }
 ```
 
-Our card can now update the store whenever someone changes its title. For now,
-we're going to add a method on the `BoardStore` to handle this logic. In
-subsequent lessons we're going to extract this update logic out event further.
+Our card can now update the store whenever someone changes its title. For now, we're going to add a method on the `BoardStore` to handle this logic. In subsequent lessons we're going to extract this update logic out event further.
 
 ```js
 class BoardStore extends EventEmitter {
@@ -357,9 +298,7 @@ class BoardStore extends EventEmitter {
 }
 ```
 
-Stores are globally unique singletons. There will only ever be one `BoardStore`.
-Therefore our card component can just require it in and update the store
-directly by calling the `updateCardTitle` method with the updated title.
+Stores are globally unique singletons. There will only ever be one `BoardStore`. Therefore our card component can just require it in and update the store directly by calling the `updateCardTitle` method with the updated title.
 
 ```js
 class Card extends React.Component {
@@ -379,16 +318,9 @@ class Card extends React.Component {
 }
 ```
 
-And we're done! Instead of passing down dozens of event handlers, we simply
-extracted out our state into a global store. The global store can be subscribed
-to and other components can update it. We essentially decoupled our component
-hierarchy (everything between `<App />` and `<Board />`) from our global store.
+And we're done! Instead of passing down dozens of event handlers, we simply extracted out our state into a global store. The global store can be subscribed to and other components can update it. We essentially decoupled our component hierarchy (everything between `<App />` and `<Board />`) from our global store.
 
-This makes adding new components and possibly bigger changes to our application
-structure much easier. It's significantly less code and also much easier to
-debug. If there is an error, it's guaranteed to be in one of the components that
-actually render or update the corresponding date, not in a completely unrelated
-"intermediary" component that simply passes down the data.
+This makes adding new components and possibly bigger changes to our application structure much easier. It's significantly less code and also much easier to debug. If there is an error, it's guaranteed to be in one of the components that actually render or update the corresponding date, not in a completely unrelated "intermediary" component that simply passes down the data.
 
 ## Resources
 
