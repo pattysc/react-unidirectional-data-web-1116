@@ -12,7 +12,7 @@
 
 To understand what "unidirectional data flow" actually means, let's first consider a real-world example: We want to implement a simple application that allows us to organize tasks in some form of project board, similar to Trello:
 
-![Trello Screenshot](./assets/Trello.png)
+![Trello Screenshot](https://s3.amazonaws.com/learn-verified/react-unidirectional-data-readme-trello.png)
 
 Trello allows you to raise issues, represented by "cards", assign them and move them into different columns, whereas each column represents a distinct step of your workflow.
 
