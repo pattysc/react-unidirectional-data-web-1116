@@ -12,11 +12,11 @@
 
 To understand what "unidirectional data flow" actually means, let's first consider a real-world example: We want to implement a simple application that allows us to organize tasks in some form of project board, similar to Trello:
 
-![Trello Screenshot](./assets/Trello.png)
+![Trello Screenshot](https://s3.amazonaws.com/learn-verified/react-unidirectional-data-readme-trello.png)
 
 Trello allows you to raise issues, represented by "cards", assign them and move them into different columns, whereas each column represents a distinct step of your workflow.
 
-When create an application like that, it's always helpful to first think about how one would go about organizing the underlying data:
+When creating an application like that, it's always helpful to first think about how one would go about organizing the underlying data:
 
 Each card can be represented by a JSON object:
 
@@ -33,12 +33,12 @@ Each card can only ever be in exactly one column. Each column has a name and a d
 {
   "name": "TODO",
   "id": 456,
-  "cards": [{
+  "cards": [
     {
       "title": "Create Mockups",
       "id": 123
     }
-  }]
+  ]
 }
 ```
 
@@ -74,7 +74,7 @@ class Column extends React.Component {
 }
 ```
 
-The only problem with this approach so far is that it becomes incredibly hard to update deeply nested cards. We kind of just "accepted" that fact that the `columns` props gets passed down into the `<Board />` component, but where would this essential application state be actually located? Most likely we would have some form of `<App />` component that has an `this.state.board = {...}`. Upon being mounted, it would do some form of HTTP request and fetch the latest board state.
+The only problem with this approach so far is that it becomes incredibly hard to update deeply nested cards. We kind of just "accepted" that fact that the `columns` props gets passed down into the `<Board />` component, but where would this essential application state be actually located? Most likely we would have some form of `<App />` component that has a `this.state.board = {...}`. Upon being mounted, it would do some form of HTTP request and fetch the latest board state.
 
 ```js
 class App extends React.Component {
@@ -106,7 +106,7 @@ Our `<Column />` component would attach an `onChangeTitle` listener to the
 `<Card />` component:
 
 ```js
-class Card extends React.Component {
+class Column extends React.Component {
   render () {
     const {cards} = this.props;
     return (
@@ -256,6 +256,8 @@ And... BOOM! We have our store! Now let's have a look at our `<App />` component
 Our `<App />` component is simply going to listen for store changes and encapsulate the corresponding application state whenever a store change occurs:
 
 ```js
+const boardStore = require('../stores/BoardStore')
+
 class App extends React.Component {
   constructor (props) {
     // ...
@@ -301,6 +303,8 @@ class BoardStore extends EventEmitter {
 Stores are globally unique singletons. There will only ever be one `BoardStore`. Therefore our card component can just require it in and update the store directly by calling the `updateCardTitle` method with the updated title.
 
 ```js
+const boardStore = require('../stores/BoardStore')
+
 class Card extends React.Component {
   constructor (props) {
     super(props);
