@@ -183,7 +183,7 @@ Let's take a step back and have a look at what our current architecture looks li
       <Card /> (has to delegate to parent component)
 ```
 
-The store could then handle the card updates in one form or another. The `<App />` component could subscribe to the store and all components would happy! No needless event handlers, just one, flat state tree.
+The store could then handle the card updates in one form or another. The `<App />` component could subscribe to the store and all components would be happy! No needless event handlers, just one, flat state tree.
 
 But let's take a step back first and summarize why the above solution is problematic:
 
